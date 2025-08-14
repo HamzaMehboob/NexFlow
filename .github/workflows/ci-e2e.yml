@@ -1,0 +1,22 @@
+name: E2E
+on:
+  workflow_dispatch:
+    inputs:
+      triggered_by:
+        description: who
+        required: false
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm i -g http-server
+      - run: http-server -p 8080 & sleep 2
+      - name: Basic smoke
+        run: |
+          curl -sSf http://localhost:8080/index.html | grep -i '<title>'
+      - name: Lighthouse (PageSpeed CI style)
+        run: |
+          npx @lhci/cli@0.13.x autorun || true
